@@ -39,17 +39,17 @@ static const char FIELD_MAZE[] = " ####################### "
 static const sf::Color WALL_COLOR = sf::Color(52, 93, 199);
 static const sf::Color ROAD_COLOR = sf::Color(40, 40, 40);
 
-static sf::FloatRect moveRect(const sf::FloatRect& rect, sf::Vector2f& offset)
+static sf::FloatRect moveRect(const sf::FloatRect &rect, sf::Vector2f &offset)
 {
-    return { rect.left + offset.x, rect.top + offset.y, rect.width, rect.height };
+    return {rect.left + offset.x, rect.top + offset.y, rect.width, rect.height};
 }
 
-static float getBottom(const sf::FloatRect& rect)
+static float getBottom(const sf::FloatRect &rect)
 {
     return rect.top + rect.height;
 }
 
-static float getRight(const sf::FloatRect& rect)
+static float getRight(const sf::FloatRect &rect)
 {
     return rect.left + rect.width;
 }
@@ -60,8 +60,10 @@ static bool isBetween(float value, float minValue, float maxValue)
 }
 
 static Direction selectShiftDirection(float leftShift, float rightShift,
-    float topShift, float bottomShift,
-    float minShift, float maxShift)
+                                      float topShift, float bottomShift,
+                                      float minShift, float maxShift) /* получаем координаты(ширину), сравниваем с min и max значением, 
+                                        при котором можем перескочить угол при движении up down right left 
+                                        смотря от движения какой угол*/
 {
     Direction result = Direction::NONE;
     float bestShift = FIELD_WIDTH * BLOCK_SIZE;
@@ -99,11 +101,11 @@ static sf::Vector2f getStartPosition(char marker)
             const size_t offset = x + y * FIELD_WIDTH;
             if (FIELD_MAZE[offset] == marker)
             {
-                return { x * BLOCK_SIZE, y * BLOCK_SIZE };
+                return {x * BLOCK_SIZE, y * BLOCK_SIZE};
             }
         }
     }
-    return { 0, 0 };
+    return {0, 0};
 }
 
 sf::Vector2f getPackmanStartPosition()
@@ -128,7 +130,7 @@ sf::Vector2f getGhostStartPosition(GhostId ghostId)
     }
 }
 
-void initializeField(Field& field)
+void initializeField(Field &field)
 {
     field.width = FIELD_WIDTH;
     field.height = FIELD_HEIGHT;
@@ -150,7 +152,7 @@ void initializeField(Field& field)
                 category = CellCategory::ROAD;
                 color = ROAD_COLOR;
             }
-            Cell& cell = field.cells[offset];
+            Cell &cell = field.cells[offset];
             cell.category = category;
             cell.bounds.setPosition(x * BLOCK_SIZE, y * BLOCK_SIZE);
             cell.bounds.setSize(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
@@ -159,7 +161,7 @@ void initializeField(Field& field)
     }
 }
 
-void drawField(sf::RenderWindow& window, const Field& field)
+void drawField(sf::RenderWindow &window, const Field &field)
 {
     for (size_t i = 0; i < field.width * field.height; i++)
     {
@@ -170,13 +172,13 @@ void drawField(sf::RenderWindow& window, const Field& field)
 // Модифицирует вектор перемещения, избегая столкновения
 // прямоугольника `rect` со стенами лабиринта в поле `field`.
 // Возвращает `true`, если вектор перемещения изменён.
-bool checkFieldWallsCollision(const Field& field, const sf::FloatRect& oldBounds, sf::Vector2f& movement)
+bool checkFieldWallsCollision(const Field &field, const sf::FloatRect &oldBounds, sf::Vector2f &movement)
 {
     sf::FloatRect newBounds = moveRect(oldBounds, movement);
     bool changed = false;
     for (size_t i = 0, n = field.width * field.height; i < n; i++)
     {
-        const Cell& cell = field.cells[i];
+        const Cell &cell = field.cells[i];
         if (cell.category == CellCategory::ROAD)
         {
             continue;
@@ -192,13 +194,13 @@ bool checkFieldWallsCollision(const Field& field, const sf::FloatRect& oldBounds
             const float movementShift = std::max(std::abs(movement.x), std::abs(movement.y));
 
             Direction direction = selectShiftDirection(leftShift, rightShift,
-                topShift, bottomShift,
-                movementShift + EPSILON, MAX_SHIFT);
+                                                       topShift, bottomShift,
+                                                       movementShift + EPSILON, MAX_SHIFT);
             if (direction == Direction::NONE)
             {
                 direction = selectShiftDirection(leftShift, rightShift,
-                    topShift, bottomShift,
-                    0, MAX_SHIFT);
+                                                 topShift, bottomShift,
+                                                 0, MAX_SHIFT);
             }
             switch (direction)
             {
@@ -224,7 +226,7 @@ bool checkFieldWallsCollision(const Field& field, const sf::FloatRect& oldBounds
     return changed;
 }
 
-void destroyField(Field& field)
+void destroyField(Field &field)
 {
     delete[] field.cells;
 }
